@@ -17,12 +17,46 @@ namespace WebApplication2.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, string brand, int? year, bool? available)
         {
-            var cars = await _context.Cars
-                .Include(c => c.Drivers)
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.SelectedBrand = brand;
+            ViewBag.SelectedYear = year;
+            ViewBag.AvailableFilter = available;
+
+            ViewBag.Brands = await _context.Cars
+                .Select(c => c.Brand)
+                .Distinct()
+                .OrderBy(b => b)
                 .ToListAsync();
-            return View(cars);
+
+            var cars = _context.Cars.Include(c => c.Drivers).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                cars = cars.Where(c => c.Brand.Contains(searchString) ||
+                                       c.Model.Contains(searchString) ||
+                                       c.LicensePlate.Contains(searchString) ||
+                                       c.Color.Contains(searchString));
+            }
+
+            if (!string.IsNullOrEmpty(brand))
+            {
+                cars = cars.Where(c => c.Brand == brand);
+            }
+
+            if (year.HasValue)
+            {
+                cars = cars.Where(c => c.Year == year.Value);
+            }
+
+            if (available.HasValue)
+            {
+                cars = cars.Where(c => c.IsAvailable == available.Value);
+            }
+
+            var result = await cars.OrderBy(c => c.Brand).ThenBy(c => c.Model).ToListAsync();
+            return View(result);
         }
 
         [AllowAnonymous]

@@ -1,0 +1,59 @@
+﻿@using WebApplication2.ViewModels
+@model EditUserRoleViewModel
+
+@{
+    ViewData["Title"] = "Змінити роль";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="mb-0"><i class="bi bi-shield"></i> Змінити роль користувача</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Користувач:</strong> @Model.UserName<br>
+                        <strong>Поточні ролі:</strong>
+                        @foreach (var role in Model.CurrentRoles)
+                        {
+                            <span class="badge bg-primary">@role</span>
+                        }
+                    </div>
+
+                    <form asp-action="EditUserRole" method="post">
+                        <input type="hidden" name="userId" value="@Model.UserId" />
+
+                        <div class="mb-4">
+                            <label class="form-label"><strong>Нова роль:</strong></label>
+                            <select name="selectedRole" class="form-select" required>
+                                @foreach (var role in Model.AllRoles)
+                                {
+                                    <option value="@role" selected="@(Model.SelectedRole == role)">
+                                        @role
+                                    </option>
+                                }
+                            </select>
+                            <div class="form-text">
+                                <strong>Admin:</strong> Повний доступ<br>
+                                <strong>Dispatcher:</strong> Управління замовленнями<br>
+                                <strong>Driver:</strong> Водій<br>
+                                <strong>Client:</strong> Клієнт (звичайний користувач)
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-save"></i> Зберегти зміни
+                            </button>
+                            <a asp-action="Users" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Назад
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

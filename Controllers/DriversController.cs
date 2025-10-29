@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication2.db;
 using WebApplication2.Models;
+using WebApplication2.ViewModels;
 
 namespace WebApplication2.Controllers
 {
@@ -16,12 +17,33 @@ namespace WebApplication2.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, decimal? minRating, int? minExperience)
         {
-            var drivers = await _context.Drivers
-                .Include(d => d.Cars)
-                .ToListAsync();
-            return View(drivers);
+            ViewBag.CurrentFilter = searchString;
+            ViewBag.MinRating = minRating;
+            ViewBag.MinExperience = minExperience;
+
+            var drivers = _context.Drivers.Include(d => d.Cars).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                drivers = drivers.Where(d => d.Name.Contains(searchString) ||
+                                            d.Phone.Contains(searchString) ||
+                                            d.LicenseNumber.Contains(searchString));
+            }
+
+            if (minRating.HasValue)
+            {
+                drivers = drivers.Where(d => d.Rating >= minRating.Value);
+            }
+
+            if (minExperience.HasValue)
+            {
+                drivers = drivers.Where(d => d.Experience >= minExperience.Value);
+            }
+
+            var result = await drivers.OrderByDescending(d => d.Rating).ToListAsync();
+            return View(result);
         }
 
         public async Task<IActionResult> Details(int? id)
@@ -130,6 +152,54 @@ namespace WebApplication2.Controllers
 
             if (driver == null) return NotFound();
             return View(driver);
+        }
+
+        [Authorize(Roles = "Admin,Dispatcher")]
+        public async Task<IActionResult> Statistics(int id)
+        {
+            var driver = await _context.Drivers
+                .Include(d => d.Cars)
+                .FirstOrDefaultAsync(d => d.Id == id);
+
+            if (driver == null) return NotFound();
+
+            var orders = await _context.Orders
+                .Where(o => o.AssignedDriverId == id)
+                .ToListAsync();
+
+            var reviews = await _context.Reviews
+                .Include(r => r.User)
+                .Where(r => r.DriverId == id)
+                .OrderByDescending(r => r.CreatedDate)
+                .Take(10)
+                .ToListAsync();
+
+            var last7Days = new List<DailyOrderStats>();
+            for (int i = 6; i >= 0; i--)
+            {
+                var date = DateTime.Today.AddDays(-i);
+                var dayOrders = orders.Where(o => o.OrderDate.Date == date && o.Status == "Завершено");
+                last7Days.Add(new DailyOrderStats
+                {
+                    Date = date,
+                    OrderCount = dayOrders.Count(),
+                    Revenue = dayOrders.Sum(o => o.TotalPrice)
+                });
+            }
+
+            var model = new DriverStatisticsViewModel
+            {
+                Driver = driver,
+                TotalOrders = orders.Count,
+                CompletedOrders = orders.Count(o => o.Status == "Завершено"),
+                TotalEarnings = orders.Where(o => o.Status == "Завершено").Sum(o => o.TotalPrice),
+                AverageRating = (decimal)(reviews.Count != 0 ? reviews.Average(r => r.Rating) : 0),
+                TotalReviews = reviews.Count,
+                Last7Days = last7Days,
+                RecentReviews = reviews
+            };
+
+            return View(model);
         }
 
         [HttpPost, ActionName("Delete")]

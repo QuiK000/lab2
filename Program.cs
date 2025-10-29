@@ -68,6 +68,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "api",
+    pattern: "api/{controller}/{action}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Services}/{action=Index}/{id?}");
 

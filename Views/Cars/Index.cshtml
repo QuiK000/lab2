@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Автопарк";
+    var brands = ViewBag.Brands as List<string>;
 }
 
 <div class="container mt-4">
@@ -10,6 +11,64 @@
         <a asp-action="Create" class="btn btn-success">
             <i class="bi bi-plus-circle"></i> Додати автомобіль
         </a>
+    </div>
+
+    <!-- Фільтри -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-funnel"></i> Фільтри</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Пошук</label>
+                        <input type="text" name="searchString" class="form-control"
+                               placeholder="Марка, модель, номер..."
+                               value="@ViewBag.CurrentFilter">
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Марка</label>
+                        <select name="brand" class="form-select">
+                            <option value="">Всі марки</option>
+                            @if (brands != null)
+                            {
+                                @foreach (var b in brands)
+                                {
+                                    <option value="@b" selected="@(ViewBag.SelectedBrand == b)">@b</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Рік</label>
+                        <input type="number" name="year" class="form-control"
+                               min="1990" max="2025"
+                               placeholder="2020"
+                               value="@ViewBag.SelectedYear">
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Доступність</label>
+                        <select name="available" class="form-select">
+                            <option value="">Всі</option>
+                            <option value="true" selected="@(ViewBag.AvailableFilter == true)">Доступні</option>
+                            <option value="false" selected="@(ViewBag.AvailableFilter == false)">Недоступні</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Застосувати
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-x"></i> Скинути
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     @if (Model.Any())

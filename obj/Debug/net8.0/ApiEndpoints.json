@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "ContainingType": "WebApplication2.Controllers.Api.ServicesApiController",
+    "Method": "GetAll",
+    "RelativePath": "api/services",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WebApplication2.Controllers.Api.ServicesApiController",
+    "Method": "GetById",
+    "RelativePath": "api/services/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WebApplication2.Controllers.Api.ServicesApiController",
+    "Method": "CalculatePrice",
+    "RelativePath": "api/services/calculate",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "WebApplication2.Controllers.Api.CalculatePriceRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

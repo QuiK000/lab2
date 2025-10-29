@@ -5,8 +5,8 @@
 }
 
 <div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
+    <div class="row">
+        <div class="col-md-7">
             <div class="card shadow">
                 <div class="card-header bg-warning text-dark">
                     <h2 class="mb-0">🚕 Оформлення замовлення</h2>
@@ -17,7 +17,8 @@
 
                         <div class="mb-3">
                             <label asp-for="ServiceId" class="form-label"></label>
-                            <select asp-for="ServiceId" class="form-select" asp-items="ViewBag.Services" id="serviceSelect">
+                            <select asp-for="ServiceId" class="form-select" asp-items="ViewBag.Services"
+                                    id="serviceSelect" onchange="calculatePrice()">
                                 <option value="">-- Оберіть послугу --</option>
                             </select>
                             <span asp-validation-for="ServiceId" class="text-danger"></span>
@@ -39,22 +40,49 @@
 
                         <div class="mb-3">
                             <label asp-for="PickupAddress" class="form-label"></label>
-                            <input asp-for="PickupAddress" class="form-control" placeholder="Звідки вас забрати?" />
+                            <div class="input-group">
+                                <input asp-for="PickupAddress" class="form-control"
+                                       placeholder="Київ, вул. Хрещатик, 1"
+                                       id="PickupAddress" />
+                                <button type="button" class="btn btn-outline-primary" onclick="searchPickup()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
                             <span asp-validation-for="PickupAddress" class="text-danger"></span>
+                            <div id="pickupResults" class="list-group mt-2" style="display:none;"></div>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="DestinationAddress" class="form-label"></label>
-                            <input asp-for="DestinationAddress" class="form-control" placeholder="Куди вас доставити?" />
+                            <div class="input-group">
+                                <input asp-for="DestinationAddress" class="form-control"
+                                       placeholder="Київ, вул. Майдан Незалежності"
+                                       id="DestinationAddress" />
+                                <button type="button" class="btn btn-outline-primary" onclick="searchDestination()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
                             <span asp-validation-for="DestinationAddress" class="text-danger"></span>
+                            <div id="destinationResults" class="list-group mt-2" style="display:none;"></div>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Distance" class="form-label"></label>
-                            <input asp-for="Distance" class="form-control" type="number" step="0.1" min="0.1"
-                                   placeholder="Відстань у кілометрах" id="distanceInput" />
+                            <div class="input-group">
+                                <input asp-for="Distance" class="form-control" type="number"
+                                       step="0.1" min="0.1"
+                                       placeholder="Відстань у кілометрах"
+                                       id="Distance"
+                                       onchange="calculatePrice()" />
+                                <span class="input-group-text">км</span>
+                                <button type="button" class="btn btn-primary" onclick="calculateRoute()">
+                                    <i class="bi bi-pin-map"></i> Розрахувати
+                                </button>
+                            </div>
                             <span asp-validation-for="Distance" class="text-danger"></span>
                         </div>
+
+                        <div id="routeInfo"></div>
 
                         <div class="alert alert-info" id="priceEstimate" style="display:none;">
                             <h5>Орієнтовна вартість:</h5>
@@ -73,6 +101,17 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-map"></i> Карта маршруту</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 600px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -81,28 +120,245 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
+        let map;
+        let pickupMarker = null;
+        let destinationMarker = null;
+        let routeLine = null;
+        let pickupCoords = null;
+        let destinationCoords = null;
+
+        // Ініціалізація карти
         document.addEventListener('DOMContentLoaded', function() {
+            map = L.map('map').setView([50.4501, 30.5234], 11); // Київ
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Іконки
+            const pickupIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            const destinationIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            window.pickupIconGlobal = pickupIcon;
+            window.destinationIconGlobal = destinationIcon;
+        });
+
+        // Пошук адреси (pickup)
+        async function searchPickup() {
+            const query = document.getElementById('PickupAddress').value;
+            if (!query) return;
+
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=ua&limit=5`);
+                const results = await response.json();
+
+                displaySearchResults(results, 'pickupResults', selectPickup);
+            } catch (error) {
+                console.error('Помилка пошуку:', error);
+            }
+        }
+
+        // Пошук адреси (destination)
+        async function searchDestination() {
+            const query = document.getElementById('DestinationAddress').value;
+            if (!query) return;
+
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=ua&limit=5`);
+                const results = await response.json();
+
+                displaySearchResults(results, 'destinationResults', selectDestination);
+            } catch (error) {
+                console.error('Помилка пошуку:', error);
+            }
+        }
+
+        function displaySearchResults(results, containerId, callback) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = '<div class="list-group-item">Нічого не знайдено</div>';
+                container.style.display = 'block';
+                return;
+            }
+
+            results.forEach(result => {
+                const item = document.createElement('a');
+                item.href = '#';
+                item.className = 'list-group-item list-group-item-action';
+                item.textContent = result.display_name;
+                item.onclick = (e) => {
+                    e.preventDefault();
+                    callback(result);
+                    container.style.display = 'none';
+                };
+                container.appendChild(item);
+            });
+
+            container.style.display = 'block';
+        }
+
+        function selectPickup(result) {
+            document.getElementById('PickupAddress').value = result.display_name;
+            pickupCoords = [parseFloat(result.lat), parseFloat(result.lon)];
+
+            if (pickupMarker) {
+                map.removeLayer(pickupMarker);
+            }
+
+            pickupMarker = L.marker(pickupCoords, { icon: window.pickupIconGlobal })
+                .addTo(map)
+                .bindPopup('📍 Точка відправлення')
+                .openPopup();
+
+            map.setView(pickupCoords, 13);
+
+            if (pickupCoords && destinationCoords) {
+                calculateRoute();
+            }
+        }
+
+        function selectDestination(result) {
+            document.getElementById('DestinationAddress').value = result.display_name;
+            destinationCoords = [parseFloat(result.lat), parseFloat(result.lon)];
+
+            if (destinationMarker) {
+                map.removeLayer(destinationMarker);
+            }
+
+            destinationMarker = L.marker(destinationCoords, { icon: window.destinationIconGlobal })
+                .addTo(map)
+                .bindPopup('🎯 Точка призначення')
+                .openPopup();
+
+            map.setView(destinationCoords, 13);
+
+            if (pickupCoords && destinationCoords) {
+                calculateRoute();
+            }
+        }
+
+        async function calculateRoute() {
+            if (!pickupCoords || !destinationCoords) {
+                alert('Будь ласка, оберіть обидві адреси');
+                return;
+            }
+
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${pickupCoords[1]},${pickupCoords[0]};${destinationCoords[1]},${destinationCoords[0]}?overview=full&geometries=geojson`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.code === 'Ok' && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const distanceInKm = (route.distance / 1000).toFixed(2);
+                    const durationInMin = Math.round(route.duration / 60);
+
+                    // Відобразити маршрут
+                    if (routeLine) {
+                        map.removeLayer(routeLine);
+                    }
+
+                    const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                    routeLine = L.polyline(coordinates, {
+                        color: '#667eea',
+                        weight: 4,
+                        opacity: 0.7
+                    }).addTo(map);
+
+                    map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+
+                    // Встановити відстань
+                    document.getElementById('Distance').value = distanceInKm;
+
+                    // Показати інформацію
+                    document.getElementById('routeInfo').innerHTML = `
+                        <div class="alert alert-success mt-3">
+                            <strong><i class="bi bi-check-circle"></i> Маршрут побудовано!</strong><br>
+                            <strong>Відстань:</strong> ${distanceInKm} км<br>
+                            <strong>Час у дорозі:</strong> ${durationInMin} хв
+                        </div>
+                    `;
+
+                    calculatePrice();
+                } else {
+                    throw new Error('Не вдалося побудувати маршрут');
+                }
+            } catch (error) {
+                document.getElementById('routeInfo').innerHTML = `
+                    <div class="alert alert-danger mt-3">
+                        <strong><i class="bi bi-exclamation-triangle"></i> Помилка!</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function calculatePrice() {
             const serviceSelect = document.getElementById('serviceSelect');
-            const distanceInput = document.getElementById('distanceInput');
+            const distanceInput = document.getElementById('Distance');
             const priceEstimate = document.getElementById('priceEstimate');
             const estimatedPrice = document.getElementById('estimatedPrice');
 
-            function calculatePrice() {
-                const serviceId = serviceSelect.value;
-                const distance = parseFloat(distanceInput.value) || 0;
+            const serviceId = parseInt(serviceSelect.value);
+            const distance = parseFloat(distanceInput.value) || 0;
 
-                if (serviceId && distance > 0) {
-                    const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+            if (serviceId && distance > 0) {
+                try {
+                    const response = await fetch(`/api/services/${serviceId}`);
+                    const service = await response.json();
+
+                    const totalPrice = service.basePrice + (service.pricePerKm * distance);
                     priceEstimate.style.display = 'block';
-                    estimatedPrice.textContent = 'Розраховується...';
-                } else {
-                    priceEstimate.style.display = 'none';
+                    estimatedPrice.textContent = `${totalPrice.toFixed(2)} грн`;
+                } catch (error) {
+                    console.error('Помилка розрахунку:', error);
                 }
+            } else {
+                priceEstimate.style.display = 'none';
             }
-
-            serviceSelect.addEventListener('change', calculatePrice);
-            distanceInput.addEventListener('input', calculatePrice);
-        });
+        }
     </script>
+
+    <style>
+        .list-group {
+            max-height: 200px;
+            overflow-y: auto;
+            position: absolute;
+            z-index: 1000;
+            width: calc(100% - 100px);
+        }
+
+        .list-group-item {
+            cursor: pointer;
+        }
+
+            .list-group-item:hover {
+                background-color: #f8f9fa;
+            }
+    </style>
 }

@@ -1,0 +1,88 @@
+﻿@model Service
+
+@{
+    ViewData["Title"] = "Видалити послугу";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Видалення послуги</h2>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-circle"></i> @TempData["Error"]
+                        </div>
+                    }
+
+                    <div class="alert alert-danger">
+                        <h5><i class="bi bi-exclamation-circle"></i> Ви впевнені, що хочете видалити цю послугу?</h5>
+                        <p class="mb-0">Цю дію неможливо скасувати!</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="text-muted">Інформація про послугу:</h5>
+                        <hr>
+                        <dl class="row">
+                            <dt class="col-sm-4">Назва:</dt>
+                            <dd class="col-sm-8"><strong>@Model.Name</strong></dd>
+
+                            <dt class="col-sm-4">Опис:</dt>
+                            <dd class="col-sm-8">@Model.Description</dd>
+
+                            <dt class="col-sm-4">Тип автомобіля:</dt>
+                            <dd class="col-sm-8">@Model.CarType</dd>
+
+                            <dt class="col-sm-4">Базова вартість:</dt>
+                            <dd class="col-sm-8">@Model.BasePrice.ToString("F2") грн</dd>
+
+                            <dt class="col-sm-4">Ціна за км:</dt>
+                            <dd class="col-sm-8">@Model.PricePerKm.ToString("F2") грн/км</dd>
+
+                            <dt class="col-sm-4">Замовлень:</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.Orders.Any())
+                                {
+                                    <span class="badge bg-warning text-dark">@Model.Orders.Count</span>
+                                    <small class="text-danger d-block mt-1">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        Видалення неможливе - є пов'язані замовлення
+                                    </small>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">0</span>
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-grid gap-2">
+                            @if (!Model.Orders.Any())
+                            {
+                                <button type="submit" class="btn btn-danger btn-lg">
+                                    <i class="bi bi-trash"></i> Підтвердити видалення
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-danger btn-lg" disabled>
+                                    <i class="bi bi-trash"></i> Видалення неможливе
+                                </button>
+                            }
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Скасувати
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

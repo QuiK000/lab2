@@ -12,6 +12,7 @@ namespace WebApplication2.db
         public DbSet<Order> Orders { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Car> Cars { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +43,18 @@ namespace WebApplication2.db
                 .HasMany(c => c.Drivers)
                 .WithMany(d => d.Cars)
                 .UsingEntity(j => j.ToTable("CarDriver"));
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Order)
+                .WithMany()
+                .HasForeignKey(r => r.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Driver)
+                .WithMany()
+                .HasForeignKey(r => r.DriverId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             modelBuilder.Entity<Service>().HasData(

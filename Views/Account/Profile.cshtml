@@ -59,6 +59,15 @@
                         </div>
                     </div>
 
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Admin" asp-action="Users">
+                                <i class="bi bi-people"></i> Користувачі
+                            </a>
+                        </li>
+                    }
+
                     <div class="alert alert-success">
                         <i class="bi bi-info-circle"></i>
                         <strong>Ваш акаунт активний</strong>

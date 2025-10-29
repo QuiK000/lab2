@@ -12,6 +12,55 @@
         </a>
     </div>
 
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-funnel"></i> Пошук та фільтри</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Пошук</label>
+                        <input type="text" name="searchString" class="form-control"
+                               placeholder="Ім'я, телефон, ліцензія..."
+                               value="@ViewBag.CurrentFilter">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Мін. рейтинг</label>
+                        <select name="minRating" class="form-select">
+                            <option value="">Всі рейтинги</option>
+                            <option value="4.5" selected="@(ViewBag.MinRating == 4.5m)">4.5+</option>
+                            <option value="4.0" selected="@(ViewBag.MinRating == 4.0m)">4.0+</option>
+                            <option value="3.5" selected="@(ViewBag.MinRating == 3.5m)">3.5+</option>
+                            <option value="3.0" selected="@(ViewBag.MinRating == 3.0m)">3.0+</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Мін. досвід</label>
+                        <select name="minExperience" class="form-select">
+                            <option value="">Будь-який</option>
+                            <option value="1" selected="@(ViewBag.MinExperience == 1)">1+ років</option>
+                            <option value="3" selected="@(ViewBag.MinExperience == 3)">3+ років</option>
+                            <option value="5" selected="@(ViewBag.MinExperience == 5)">5+ років</option>
+                            <option value="10" selected="@(ViewBag.MinExperience == 10)">10+ років</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Шукати
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-sm">
+                                <i class="bi bi-x"></i> Скинути
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     @if (Model.Any())
     {
         <div class="row">
@@ -66,10 +115,15 @@
                             </div>
                         </div>
                         <div class="card-footer bg-transparent">
-                            <div class="btn-group w-100" role="group">
+                            <div class="btn-group w-100 mb-2" role="group">
                                 <a asp-action="Details" asp-route-id="@driver.Id" class="btn btn-sm btn-info">
                                     <i class="bi bi-eye"></i> Деталі
                                 </a>
+                                <a asp-action="Statistics" asp-route-id="@driver.Id" class="btn btn-sm btn-success">
+                                    <i class="bi bi-graph-up"></i> Статистика
+                                </a>
+                            </div>
+                            <div class="btn-group w-100" role="group">
                                 <a asp-action="Edit" asp-route-id="@driver.Id" class="btn btn-sm btn-warning">
                                     <i class="bi bi-pencil"></i> Редагувати
                                 </a>
@@ -88,7 +142,7 @@
                 <div class="col-md-4">
                     <div class="card text-center">
                         <div class="card-body">
-                            <h5 class="card-title">Всього водіїв</h5>
+                            <h5 class="card-title">Знайдено водіїв</h5>
                             <h2 class="text-primary">@Model.Count()</h2>
                         </div>
                     </div>
@@ -115,23 +169,11 @@
     else
     {
         <div class="alert alert-info text-center p-5">
-            <h3>📭 Водіїв поки немає</h3>
-            <p class="lead">Додайте першого водія</p>
-            <a asp-action="Create" class="btn btn-success btn-lg mt-3">
-                <i class="bi bi-person-plus"></i> Додати водія
+            <h3>📭 Водіїв не знайдено</h3>
+            <p class="lead">Спробуйте змінити параметри пошуку</p>
+            <a asp-action="Index" class="btn btn-primary mt-3">
+                <i class="bi bi-arrow-clockwise"></i> Показати всіх
             </a>
         </div>
     }
 </div>
-
-@section Styles {
-    <style>
-        .card {
-            transition: transform 0.2s;
-        }
-
-            .card:hover {
-                transform: translateY(-5px);
-            }
-    </style>
-}

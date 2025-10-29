@@ -1,0 +1,93 @@
+﻿@model Review
+
+@{
+    ViewData["Title"] = "Залишити відгук";
+    var order = ViewBag.Order as Order;
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0"><i class="bi bi-star"></i> Залишити відгук</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5>Замовлення #@order.Id</h5>
+                        <p class="mb-1"><strong>Водій:</strong> @order.AssignedDriver?.Name</p>
+                        <p class="mb-1"><strong>Маршрут:</strong> @order.PickupAddress → @order.DestinationAddress</p>
+                        <p class="mb-0"><strong>Дата:</strong> @order.OrderDate.ToString("dd.MM.yyyy HH:mm")</p>
+                    </div>
+
+                    <form asp-action="Create" method="post">
+                        <input type="hidden" asp-for="OrderId" />
+                        <input type="hidden" asp-for="DriverId" />
+
+                        <div class="mb-4">
+                            <label asp-for="Rating" class="form-label"></label>
+                            <div class="rating-stars">
+                                @for (int i = 5; i >= 1; i--)
+                                {
+                                    <input type="radio" name="Rating" value="@i" id="star@i" required />
+                                    <label for="star@i" class="star">★</label>
+                                }
+                            </div>
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Comment" class="form-label"></label>
+                            <textarea asp-for="Comment" class="form-control" rows="4"
+                                      placeholder="Розкажіть про вашу поїздку (необов'язково)"></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Відправити відгук
+                            </button>
+                            <a asp-controller="Orders" asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Назад до замовлень
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .rating-stars {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            gap: 10px;
+            font-size: 3rem;
+        }
+
+            .rating-stars input[type="radio"] {
+                display: none;
+            }
+
+            .rating-stars label.star {
+                cursor: pointer;
+                color: #ddd;
+                transition: color 0.2s;
+            }
+
+                .rating-stars input[type="radio"]:checked ~ label.star,
+                .rating-stars label.star:hover,
+                .rating-stars label.star:hover ~ label.star {
+                    color: #ffc107;
+                }
+    </style>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

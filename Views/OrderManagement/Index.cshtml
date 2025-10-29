@@ -61,6 +61,17 @@
         </div>
     </div>
 
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-4 mb-4">🎯 Управління замовленнями</h1>
+        <a asp-action="ExportToCSV"
+           asp-route-status="@ViewBag.CurrentStatus"
+           asp-route-fromDate="@ViewBag.FromDate"
+           asp-route-toDate="@ViewBag.ToDate"
+           class="btn btn-success">
+            <i class="bi bi-download"></i> Експортувати в CSV
+        </a>
+    </div>
+
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-primary text-white">

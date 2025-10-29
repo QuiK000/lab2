@@ -1,0 +1,94 @@
+﻿@model List<Service>
+
+@{
+    ViewData["Title"] = "Головна";
+}
+
+<div class="container">
+    <!-- Hero Section -->
+    <div class="text-center py-5">
+        <h1 class="display-3 fw-bold mb-3">
+            <i class="bi bi-taxi-front text-warning"></i> TaxiService
+        </h1>
+        <p class="lead mb-4">Швидко, комфортно, надійно</p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <a asp-controller="Home" asp-action="Calculator" class="btn btn-primary btn-lg">
+                <i class="bi bi-calculator"></i> Розрахувати вартість
+            </a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="Orders" asp-action="Create" class="btn btn-warning btn-lg">
+                    <i class="bi bi-cart-plus"></i> Замовити таксі
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Register" class="btn btn-success btn-lg">
+                    <i class="bi bi-person-plus"></i> Зареєструватися
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-clock-history display-3 text-primary mb-3"></i>
+                    <h4>Швидко</h4>
+                    <p>Подача автомобіля за 10-15 хвилин</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-shield-check display-3 text-success mb-3"></i>
+                    <h4>Безпечно</h4>
+                    <p>Перевірені водії з досвідом</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="bi bi-cash-coin display-3 text-warning mb-3"></i>
+                    <h4>Доступно</h4>
+                    <p>Різні тарифи на будь-який бюджет</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services -->
+    <h2 class="text-center mb-4">Наші тарифи</h2>
+    <div class="row">
+        @foreach (var service in Model)
+        {
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-warning text-dark text-center">
+                        <h5 class="mb-0">@service.Name</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <p class="text-muted small">@service.Description</p>
+                        <h4 class="text-primary">
+                            від @service.BasePrice.ToString("F0") грн
+                        </h4>
+                        <small class="text-muted">
+                            + @service.PricePerKm грн/км
+                        </small>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a asp-controller="Orders" asp-action="Create"
+                           asp-route-serviceId="@service.Id"
+                           class="btn btn-primary w-100">
+                            Замовити
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 using WebApplication2.db;
 using WebApplication2.Models;
 
@@ -60,6 +61,56 @@ namespace WebApplication2.Controllers
             ViewBag.ToDate = toDate?.ToString("yyyy-MM-dd");
 
             return View(orders);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,Dispatcher")]
+        public async Task<IActionResult> ExportToCSV(string? status, DateTime? fromDate, DateTime? toDate)
+        {
+            var query = _context.Orders
+                .Include(o => o.Service)
+                .Include(o => o.AssignedDriver)
+                .Include(o => o.AssignedCar)
+                .Include(o => o.User)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(status))
+                query = query.Where(o => o.Status == status);
+
+            if (fromDate.HasValue)
+                query = query.Where(o => o.OrderDate >= fromDate.Value);
+
+            if (toDate.HasValue)
+            {
+                var endDate = toDate.Value.AddDays(1);
+                query = query.Where(o => o.OrderDate < endDate);
+            }
+
+            var orders = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
+
+            var csv = new StringBuilder();
+            csv.AppendLine("№,Дата,Клієнт,Телефон,Послуга,Водій,Автомобіль,Від,До,Відстань,Вартість,Статус");
+
+            foreach (var order in orders)
+            {
+                csv.AppendLine($"{order.Id}," +
+                    $"{order.OrderDate:dd.MM.yyyy HH:mm}," +
+                    $"\"{order.CustomerName}\"," +
+                    $"{order.Phone}," +
+                    $"\"{order.Service?.Name}\"," +
+                    $"\"{order.AssignedDriver?.Name ?? "Не призначено"}\"," +
+                    $"\"{order.AssignedCar?.LicensePlate ?? "-"}\"," +
+                    $"\"{order.PickupAddress}\"," +
+                    $"\"{order.DestinationAddress}\"," +
+                    $"{order.Distance}," +
+                    $"{order.TotalPrice}," +
+                    $"{order.Status}");
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+            var fileName = $"Orders_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+
+            return File(bytes, "text/csv", fileName);
         }
 
         [HttpGet]
