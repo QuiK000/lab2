@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication2.db;
 using WebApplication2.Models;
 
 namespace WebApplication2.Controllers
 {
+    [Authorize(Roles = "Admin,Dispatcher")]
     public class CarsController : Controller
     {
         private readonly TaxiContext _context;
@@ -14,6 +16,7 @@ namespace WebApplication2.Controllers
             _context = context;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var cars = await _context.Cars
@@ -22,6 +25,7 @@ namespace WebApplication2.Controllers
             return View(cars);
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -40,6 +44,7 @@ namespace WebApplication2.Controllers
 
             return View(car);
         }
+
         public IActionResult Create()
         {
             return View();
@@ -102,6 +107,7 @@ namespace WebApplication2.Controllers
             }
             return View(car);
         }
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)

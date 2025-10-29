@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication2.db;
 using WebApplication2.Models;
 
 namespace WebApplication2.Controllers
 {
+    [Authorize(Roles = "Admin,Dispatcher")]
     public class DriversController : Controller
     {
         private readonly TaxiContext _context;
@@ -73,11 +75,11 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Phone,LicenseNumber,Experience,Rating")] Driver driver, int[]selectedCars)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Phone,LicenseNumber,Experience,Rating")] Driver driver, int[] selectedCars)
         {
             if (id != driver.Id) return NotFound();
-            
-            if(ModelState.IsValid)
+
+            if (ModelState.IsValid)
             {
                 try
                 {

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\teamq\\source\\repos\\WebApplication2\\WebApplication2\\WebApplication2.csproj": {}
+    "C:\\Users\\teamq\\source\\repos\\lab3\\WebApplication2\\WebApplication2.csproj": {}
   },
   "projects": {
-    "C:\\Users\\teamq\\source\\repos\\WebApplication2\\WebApplication2\\WebApplication2.csproj": {
+    "C:\\Users\\teamq\\source\\repos\\lab3\\WebApplication2\\WebApplication2.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\teamq\\source\\repos\\WebApplication2\\WebApplication2\\WebApplication2.csproj",
+        "projectUniqueName": "C:\\Users\\teamq\\source\\repos\\lab3\\WebApplication2\\WebApplication2.csproj",
         "projectName": "WebApplication2",
-        "projectPath": "C:\\Users\\teamq\\source\\repos\\WebApplication2\\WebApplication2\\WebApplication2.csproj",
+        "projectPath": "C:\\Users\\teamq\\source\\repos\\lab3\\WebApplication2\\WebApplication2.csproj",
         "packagesPath": "D:\\NuGetPackages",
-        "outputPath": "C:\\Users\\teamq\\source\\repos\\WebApplication2\\WebApplication2\\obj\\",
+        "outputPath": "C:\\Users\\teamq\\source\\repos\\lab3\\WebApplication2\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "D:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -50,6 +50,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.21, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[9.0.9, )"
