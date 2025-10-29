@@ -1,0 +1,108 @@
+﻿@model Order
+
+@{
+    ViewData["Title"] = "Замовити таксі";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="mb-0">🚕 Оформлення замовлення</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" id="orderForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="ServiceId" class="form-label"></label>
+                            <select asp-for="ServiceId" class="form-select" asp-items="ViewBag.Services" id="serviceSelect">
+                                <option value="">-- Оберіть послугу --</option>
+                            </select>
+                            <span asp-validation-for="ServiceId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CustomerName" class="form-label"></label>
+                                <input asp-for="CustomerName" class="form-control" placeholder="Введіть ваше ім'я" />
+                                <span asp-validation-for="CustomerName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Phone" class="form-label"></label>
+                                <input asp-for="Phone" class="form-control" placeholder="+380XXXXXXXXX" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PickupAddress" class="form-label"></label>
+                            <input asp-for="PickupAddress" class="form-control" placeholder="Звідки вас забрати?" />
+                            <span asp-validation-for="PickupAddress" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DestinationAddress" class="form-label"></label>
+                            <input asp-for="DestinationAddress" class="form-control" placeholder="Куди вас доставити?" />
+                            <span asp-validation-for="DestinationAddress" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Distance" class="form-label"></label>
+                            <input asp-for="Distance" class="form-control" type="number" step="0.1" min="0.1"
+                                   placeholder="Відстань у кілометрах" id="distanceInput" />
+                            <span asp-validation-for="Distance" class="text-danger"></span>
+                        </div>
+
+                        <div class="alert alert-info" id="priceEstimate" style="display:none;">
+                            <h5>Орієнтовна вартість:</h5>
+                            <h3 class="mb-0" id="estimatedPrice">0.00 грн</h3>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Підтвердити замовлення
+                            </button>
+                            <a asp-controller="Services" asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Назад до послуг
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const serviceSelect = document.getElementById('serviceSelect');
+            const distanceInput = document.getElementById('distanceInput');
+            const priceEstimate = document.getElementById('priceEstimate');
+            const estimatedPrice = document.getElementById('estimatedPrice');
+
+            function calculatePrice() {
+                const serviceId = serviceSelect.value;
+                const distance = parseFloat(distanceInput.value) || 0;
+
+                if (serviceId && distance > 0) {
+                    const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+                    priceEstimate.style.display = 'block';
+                    estimatedPrice.textContent = 'Розраховується...';
+                } else {
+                    priceEstimate.style.display = 'none';
+                }
+            }
+
+            serviceSelect.addEventListener('change', calculatePrice);
+            distanceInput.addEventListener('input', calculatePrice);
+        });
+    </script>
+}

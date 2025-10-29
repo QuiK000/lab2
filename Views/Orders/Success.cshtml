@@ -1,0 +1,201 @@
+﻿@model Order
+
+@{
+    ViewData["Title"] = "Замовлення підтверджено";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-body text-center p-5">
+                    <div class="success-checkmark mb-4">
+                        <div class="check-icon">
+                            <span class="icon-line line-tip"></span>
+                            <span class="icon-line line-long"></span>
+                            <div class="icon-circle"></div>
+                            <div class="icon-fix"></div>
+                        </div>
+                    </div>
+                    
+                    <h1 class="text-success mb-3">✅ Замовлення успішно оформлено!</h1>
+                    <p class="lead mb-4">Ваше таксі вже в дорозі</p>
+
+                    <div class="order-details bg-light p-4 rounded mb-4">
+                        <h4 class="mb-3">Деталі замовлення #@Model.Id</h4>
+                        
+                        <div class="row text-start">
+                            <div class="col-md-6 mb-3">
+                                <strong>Клієнт:</strong><br>
+                                @Model.CustomerName
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Телефон:</strong><br>
+                                @Model.Phone
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Послуга:</strong><br>
+                                @Model.Service?.Name
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Тип авто:</strong><br>
+                                @Model.Service?.CarType
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <strong>📍 Адреса подачі:</strong><br>
+                                @Model.PickupAddress
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <strong>🎯 Адреса призначення:</strong><br>
+                                @Model.DestinationAddress
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Відстань:</strong><br>
+                                @Model.Distance.ToString("F2") км
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Дата замовлення:</strong><br>
+                                @Model.OrderDate.ToString("dd.MM.yyyy HH:mm")
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="total-price">
+                            <h3 class="text-primary mb-0">
+                                Загальна вартість: <strong>@Model.TotalPrice.ToString("F2") грн</strong>
+                            </h3>
+                            <small class="text-muted">
+                                (Базова вартість: @Model.Service?.BasePrice.ToString("F2") грн + 
+                                @Model.Distance.ToString("F2") км × @Model.Service?.PricePerKm.ToString("F2") грн/км)
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Очікуваний час подачі:</strong> 10-15 хвилин
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a asp-controller="Services" asp-action="Index" class="btn btn-primary btn-lg">
+                            <i class="bi bi-arrow-left"></i> Повернутися до послуг
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-list"></i> Переглянути всі замовлення
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+        }
+
+        .success-checkmark .check-icon {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            border-radius: 50%;
+            box-sizing: content-box;
+            border: 4px solid #4caf50;
+        }
+
+        .success-checkmark .check-icon::before {
+            top: 3px;
+            left: -2px;
+            width: 30px;
+            transform-origin: 100% 50%;
+            border-radius: 100px 0 0 100px;
+        }
+
+        .success-checkmark .check-icon::after {
+            top: 0;
+            left: 30px;
+            width: 60px;
+            transform-origin: 0 50%;
+            border-radius: 0 100px 100px 0;
+            animation: rotate-circle 4.25s ease-in;
+        }
+
+        .success-checkmark .check-icon::before,
+        .success-checkmark .check-icon::after {
+            content: '';
+            height: 100px;
+            position: absolute;
+            background: #fff;
+            transform: rotate(-45deg);
+        }
+
+        .success-checkmark .icon-line {
+            height: 5px;
+            background-color: #4caf50;
+            display: block;
+            border-radius: 2px;
+            position: absolute;
+            z-index: 10;
+        }
+
+        .success-checkmark .icon-line.line-tip {
+            top: 46px;
+            left: 14px;
+            width: 25px;
+            transform: rotate(45deg);
+            animation: icon-line-tip 0.75s;
+        }
+
+        .success-checkmark .icon-line.line-long {
+            top: 38px;
+            right: 8px;
+            width: 47px;
+            transform: rotate(-45deg);
+            animation: icon-line-long 0.75s;
+        }
+
+        .success-checkmark .icon-circle {
+            top: -4px;
+            left: -4px;
+            z-index: 10;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: absolute;
+            box-sizing: content-box;
+            border: 4px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .success-checkmark .icon-fix {
+            top: 8px;
+            width: 5px;
+            left: 26px;
+            z-index: 1;
+            height: 85px;
+            position: absolute;
+            transform: rotate(-45deg);
+            background-color: #fff;
+        }
+
+        .order-details {
+            text-align: left;
+        }
+
+        .total-price {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .total-price h3 {
+            color: white;
+        }
+    </style>
+    }

@@ -1,0 +1,137 @@
+﻿@model IEnumerable<Driver>
+
+@{
+    ViewData["Title"] = "Список водіїв";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-4">Водії служби таксі</h1>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Додати водія
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var driver in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-person-circle"></i> @driver.Name
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong><i class="bi bi-telephone"></i> Телефон:</strong><br>
+                                @driver.Phone
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="bi bi-card-heading"></i> Ліцензія:</strong><br>
+                                @driver.LicenseNumber
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="bi bi-calendar-check"></i> Досвід:</strong>
+                                <span class="badge bg-info">@driver.Experience років</span>
+                            </p>
+                            <p class="mb-3">
+                                <strong><i class="bi bi-star-fill"></i> Рейтинг:</strong>
+                                <span class="badge bg-warning text-dark">@driver.Rating.ToString("F1")</span>
+                            </p>
+
+                            <hr>
+
+                            <div class="mb-0">
+                                <strong><i class="bi bi-car-front"></i> Автомобілі (@driver.Cars.Count):</strong>
+                                @if (driver.Cars.Any())
+                                {
+                                    <ul class="list-unstyled mt-2">
+                                        @foreach (var car in driver.Cars)
+                                        {
+                                            <li class="mb-1">
+                                                <span class="badge bg-secondary">
+                                                    @car.Brand @car.Model (@car.LicensePlate)
+                                                </span>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small mt-2">Немає призначених автомобілів</p>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="btn-group w-100" role="group">
+                                <a asp-action="Details" asp-route-id="@driver.Id" class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i> Деталі
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@driver.Id" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i> Редагувати
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@driver.Id" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Видалити
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Всього водіїв</h5>
+                            <h2 class="text-primary">@Model.Count()</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Середній досвід</h5>
+                            <h2 class="text-success">@Model.Average(d => d.Experience).ToString("F1") років</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Середній рейтинг</h5>
+                            <h2 class="text-warning">@Model.Average(d => d.Rating).ToString("F2")</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center p-5">
+            <h3>📭 Водіїв поки немає</h3>
+            <p class="lead">Додайте першого водія</p>
+            <a asp-action="Create" class="btn btn-success btn-lg mt-3">
+                <i class="bi bi-person-plus"></i> Додати водія
+            </a>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            transition: transform 0.2s;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+            }
+    </style>
+}

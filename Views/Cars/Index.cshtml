@@ -1,0 +1,150 @@
+﻿@model IEnumerable<Car>
+
+@{
+    ViewData["Title"] = "Автопарк";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-4">Автопарк служби таксі</h1>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Додати автомобіль
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var car in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm @(car.IsAvailable ? "border-success" : "border-secondary")">
+                        <div class="card-header @(car.IsAvailable ? "bg-success" : "bg-secondary") text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-car-front-fill"></i> @car.Brand @car.Model
+                            </h5>
+                            <small>@car.LicensePlate</small>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">
+                                <strong><i class="bi bi-palette"></i> Колір:</strong> @car.Color
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="bi bi-calendar3"></i> Рік:</strong> @car.Year
+                            </p>
+                            <p class="mb-2">
+                                <strong><i class="bi bi-truck"></i> Тип кузова:</strong> @car.BodyType
+                            </p>
+                            <p class="mb-3">
+                                <strong>Статус:</strong>
+                                @if (car.IsAvailable)
+                                {
+                                    <span class="badge bg-success">Доступний</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Недоступний</span>
+                                }
+                            </p>
+
+                            <hr>
+
+                            <div class="mb-0">
+                                <strong><i class="bi bi-people"></i> Водії (@car.Drivers.Count):</strong>
+                                @if (car.Drivers.Any())
+                                {
+                                    <ul class="list-unstyled mt-2">
+                                        @foreach (var driver in car.Drivers)
+                                        {
+                                            <li class="mb-1">
+                                                <span class="badge bg-primary">
+                                                    @driver.Name (⭐ @driver.Rating.ToString("F1"))
+                                                </span>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <p class="text-muted small mt-2">Немає призначених водіїв</p>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="btn-group w-100" role="group">
+                                <a asp-action="Details" asp-route-id="@car.Id" class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i> Деталі
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@car.Id" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i> Редагувати
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@car.Id" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Видалити
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Всього автомобілів</h5>
+                            <h2 class="text-primary">@Model.Count()</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Доступні</h5>
+                            <h2 class="text-success">@Model.Count(c => c.IsAvailable)</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Недоступні</h5>
+                            <h2 class="text-secondary">@Model.Count(c => !c.IsAvailable)</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Середній рік</h5>
+                            <h2 class="text-info">@Model.Average(c => c.Year).ToString("F0")</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center p-5">
+            <h3>📭 Автомобілів поки немає</h3>
+            <p class="lead">Додайте перший автомобіль</p>
+            <a asp-action="Create" class="btn btn-success btn-lg mt-3">
+                <i class="bi bi-car-front"></i> Додати автомобіль
+            </a>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            transition: transform 0.2s;
+        }
+
+            .card:hover {
+                transform: translateY(-5px);
+            }
+    </style>
+}

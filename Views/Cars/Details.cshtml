@@ -1,0 +1,121 @@
+﻿@model Car
+
+@{
+    ViewData["Title"] = "Деталі автомобіля";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h2 class="mb-0"><i class="bi bi-car-front-fill"></i> Інформація про автомобіль</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Основні характеристики</h5>
+                            <hr>
+                            <p>
+                                <strong>Марка і модель:</strong><br>
+                                <span class="fs-5">@Model.Brand @Model.Model</span>
+                            </p>
+                            <p>
+                                <strong>Номерний знак:</strong><br>
+                                <span class="badge bg-dark fs-6">@Model.LicensePlate</span>
+                            </p>
+                            <p>
+                                <strong>Колір:</strong><br>
+                                <i class="bi bi-palette"></i> @Model.Color
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Додаткова інформація</h5>
+                            <hr>
+                            <p>
+                                <strong>Рік випуску:</strong><br>
+                                <i class="bi bi-calendar3"></i> @Model.Year
+                            </p>
+                            <p>
+                                <strong>Тип кузова:</strong><br>
+                                <i class="bi bi-truck"></i> @Model.BodyType
+                            </p>
+                            <p>
+                                <strong>Статус:</strong><br>
+                                @if (Model.IsAvailable)
+                                {
+                                    <span class="badge bg-success fs-6">
+                                        <i class="bi bi-check-circle"></i> Доступний
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary fs-6">
+                                        <i class="bi bi-x-circle"></i> Недоступний
+                                    </span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <h5 class="text-muted">
+                            <i class="bi bi-people"></i> Водії, які керують цим автомобілем (@Model.Drivers.Count)
+                        </h5>
+                        <hr>
+                        @if (Model.Drivers.Any())
+                        {
+                            <div class="row">
+                                @foreach (var driver in Model.Drivers)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card border-primary">
+                                            <div class="card-body">
+                                                <h6 class="card-title">
+                                                    <i class="bi bi-person-circle"></i>
+                                                    <strong>@driver.Name</strong>
+                                                </h6>
+                                                <p class="card-text mb-1">
+                                                    <i class="bi bi-telephone"></i> @driver.Phone
+                                                </p>
+                                                <p class="card-text mb-1">
+                                                    <i class="bi bi-card-heading"></i> Ліцензія: @driver.LicenseNumber
+                                                </p>
+                                                <p class="card-text mb-1">
+                                                    <i class="bi bi-calendar-check"></i> Досвід: @driver.Experience років
+                                                </p>
+                                                <p class="card-text mb-0">
+                                                    <i class="bi bi-star-fill"></i> Рейтинг:
+                                                    <span class="badge bg-warning text-dark">@driver.Rating.ToString("F1")</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                Цьому автомобілю не призначено жодного водія
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Редагувати
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Назад до списку
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
