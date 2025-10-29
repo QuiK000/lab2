@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -51,7 +52,8 @@ namespace WebApplication2.Controllers
 
         public async Task<IActionResult> Create(int? serviceId)
         {
-            ViewBag.Services = new SelectList(await _context.Services.ToListAsync(), "Id", "Name", serviceId);
+            var services = await _context.Services.ToListAsync();
+            ViewBag.Services = new SelectList(services, "Id", "Name", serviceId);
 
             var order = new Order();
             if (serviceId.HasValue)
@@ -63,8 +65,14 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,CustomerName,Phone,PickupAddress,DestinationAddress,Distance,ServiceId")] Order order)
         {
+            ModelState.Remove("Service");
+            ModelState.Remove("User");
+            ModelState.Remove("AssignedDriver");
+            ModelState.Remove("AssignedCar");
+
             if (ModelState.IsValid)
             {
                 var service = await _context.Services.FindAsync(order.ServiceId);
@@ -73,19 +81,25 @@ namespace WebApplication2.Controllers
                     order.TotalPrice = service.BasePrice + (service.PricePerKm * order.Distance);
                     order.OrderDate = DateTime.Now;
                     order.Status = "Нове";
-                    order.UserId = _userManager.GetUserId(User); // Прив'язка до користувача
+                    order.UserId = _userManager.GetUserId(User);
 
                     _context.Add(order);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Success), new { id = order.Id });
                 }
+                else
+                {
+                    ModelState.AddModelError("ServiceId", "Послуга не знайдена");
+                }
             }
 
-            ViewBag.Services = new SelectList(await _context.Services.ToListAsync(), "Id", "Name", order.ServiceId);
+            var services = await _context.Services.ToListAsync();
+            ViewBag.Services = new SelectList(services, "Id", "Name", order.ServiceId);
             return View(order);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Cancel(int id)
         {
             var userId = _userManager.GetUserId(User);

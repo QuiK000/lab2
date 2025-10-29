@@ -2,7 +2,7 @@
   {
     "ContainingType": "WebApplication2.Controllers.Api.ServicesApiController",
     "Method": "GetAll",
-    "RelativePath": "api/services",
+    "RelativePath": "api/ServicesApi",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -12,7 +12,7 @@
   {
     "ContainingType": "WebApplication2.Controllers.Api.ServicesApiController",
     "Method": "GetById",
-    "RelativePath": "api/services/{id}",
+    "RelativePath": "api/ServicesApi/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -28,7 +28,7 @@
   {
     "ContainingType": "WebApplication2.Controllers.Api.ServicesApiController",
     "Method": "CalculatePrice",
-    "RelativePath": "api/services/calculate",
+    "RelativePath": "api/ServicesApi/calculate",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,

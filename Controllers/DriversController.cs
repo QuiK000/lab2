@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication2.db;
@@ -64,19 +65,30 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Phone,LicenseNumber,Experience,Rating")] Driver driver, int[] selectedCars)
         {
-            _context.Add(driver);
-            await _context.SaveChangesAsync();
+            // Видаляємо помилки для навігаційної властивості
+            ModelState.Remove("Cars");
 
-            if (selectedCars != null && selectedCars.Length > 0)
+            if (ModelState.IsValid)
             {
-                var cars = await _context.Cars
-                    .Where(c => selectedCars.Contains(c.Id))
-                    .ToListAsync();
-
-                foreach (var car in cars) driver.Cars.Add(car);
+                _context.Add(driver);
                 await _context.SaveChangesAsync();
+
+                if (selectedCars != null && selectedCars.Length > 0)
+                {
+                    var cars = await _context.Cars
+                        .Where(c => selectedCars.Contains(c.Id))
+                        .ToListAsync();
+
+                    foreach (var car in cars)
+                    {
+                        driver.Cars.Add(car);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -97,43 +109,56 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Phone,LicenseNumber,Experience,Rating")] Driver driver, int[] selectedCars)
         {
             if (id != driver.Id) return NotFound();
+
+            // Видаляємо помилки для навігаційної властивості
+            ModelState.Remove("Cars");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(driver);
                     var driverFromDb = await _context.Drivers
                         .Include(d => d.Cars)
                         .FirstOrDefaultAsync(d => d.Id == id);
 
                     if (driverFromDb == null) return NotFound();
 
+                    // Оновлюємо властивості
                     driverFromDb.Name = driver.Name;
                     driverFromDb.Phone = driver.Phone;
                     driverFromDb.LicenseNumber = driver.LicenseNumber;
                     driverFromDb.Experience = driver.Experience;
                     driverFromDb.Rating = driver.Rating;
 
+                    // Оновлюємо автомобілі
                     var allCars = await _context.Cars.ToListAsync();
                     foreach (var car in allCars)
                     {
                         bool isSelected = selectedCars != null && selectedCars.Contains(car.Id);
                         bool isCurrentlyAssigned = driverFromDb.Cars.Any(c => c.Id == car.Id);
 
-                        if (isSelected && !isCurrentlyAssigned) driverFromDb.Cars.Add(car);
-                        else if (!isSelected && isCurrentlyAssigned) driverFromDb.Cars.Remove(car);
+                        if (isSelected && !isCurrentlyAssigned)
+                        {
+                            driverFromDb.Cars.Add(car);
+                        }
+                        else if (!isSelected && isCurrentlyAssigned)
+                        {
+                            driverFromDb.Cars.Remove(car);
+                        }
                     }
 
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DriverExists(driver.Id)) return NotFound();
-                    else throw;
+                    if (!DriverExists(driver.Id))
+                        return NotFound();
+                    else
+                        throw;
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -193,7 +218,7 @@ namespace WebApplication2.Controllers
                 TotalOrders = orders.Count,
                 CompletedOrders = orders.Count(o => o.Status == "Завершено"),
                 TotalEarnings = orders.Where(o => o.Status == "Завершено").Sum(o => o.TotalPrice),
-                AverageRating = (decimal)(reviews.Count != 0 ? reviews.Average(r => r.Rating) : 0),
+                AverageRating = reviews.Any() ? (decimal)reviews.Average(r => r.Rating) : 0,
                 TotalReviews = reviews.Count,
                 Last7Days = last7Days,
                 RecentReviews = reviews
@@ -203,6 +228,7 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var driver = await _context.Drivers

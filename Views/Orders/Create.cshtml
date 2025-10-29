@@ -70,10 +70,11 @@
                             <label asp-for="Distance" class="form-label"></label>
                             <div class="input-group">
                                 <input asp-for="Distance" class="form-control" type="number"
-                                       step="0.1" min="0.1"
+                                       step="any" min="0.1"
                                        placeholder="Відстань у кілометрах"
                                        id="Distance"
                                        onchange="calculatePrice()" />
+
                                 <span class="input-group-text">км</span>
                                 <button type="button" class="btn btn-primary" onclick="calculateRoute()">
                                     <i class="bi bi-pin-map"></i> Розрахувати

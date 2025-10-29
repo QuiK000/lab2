@@ -346,4 +346,3 @@ C:\Users\teamq\source\repos\lab3\WebApplication2\obj\Debug\net8.0\staticwebasset
 C:\Users\teamq\source\repos\lab3\WebApplication2\obj\Debug\net8.0\WebAppli.0DB3FC1A.Up2Date
 C:\Users\teamq\source\repos\lab3\WebApplication2\obj\Debug\net8.0\WebApplication2.genruntimeconfig.cache
 C:\Users\teamq\source\repos\lab3\WebApplication2\obj\Debug\net8.0\ref\WebApplication2.dll
-C:\Users\teamq\source\repos\lab3\WebApplication2\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
