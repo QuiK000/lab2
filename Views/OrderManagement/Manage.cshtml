@@ -1,0 +1,108 @@
+﻿@model Order
+
+@{
+    ViewData["Title"] = $"Управління замовленням #{Model.Id}";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="bi bi-gear-fill"></i> Управління замовленням #@Model.Id</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Інформація про клієнта</h5>
+                            <hr>
+                            <p><strong>Ім'я:</strong> @Model.CustomerName</p>
+                            <p><strong>Телефон:</strong> @Model.Phone</p>
+                            <p><strong>Дата замовлення:</strong> @Model.OrderDate.ToString("dd.MM.yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-muted">Деталі поїздки</h5>
+                            <hr>
+                            <p><strong>Послуга:</strong> <span class="badge bg-info">@Model.Service?.Name</span></p>
+                            <p><strong>Відстань:</strong> @Model.Distance.ToString("F2") км</p>
+                            <p><strong>Вартість:</strong> <strong class="text-success">@Model.TotalPrice.ToString("N0") грн</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="text-muted">Маршрут</h5>
+                        <hr>
+                        <p><strong>📍 Від:</strong> @Model.PickupAddress</p>
+                        <p><strong>🎯 До:</strong> @Model.DestinationAddress</p>
+                    </div>
+
+                    <form asp-action="Manage" method="post">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label"><strong>Статус замовлення</strong></label>
+                                <select name="status" class="form-select" required>
+                                    @foreach (var status in ViewBag.Statuses)
+                                    {
+                                        <option value="@status" selected="@(Model.Status == status)">@status</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label"><strong>Призначити водія</strong></label>
+                                <select name="assignedDriverId" class="form-select">
+                                    <option value="">-- Не призначено --</option>
+                                    @foreach (var driver in ViewBag.Drivers as SelectList)
+                                    {
+                                        <option value="@driver.Value" selected="@driver.Selected">@driver.Text</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label"><strong>Призначити автомобіль</strong></label>
+                                <select name="assignedCarId" class="form-select">
+                                    <option value="">-- Не призначено --</option>
+                                    @foreach (var car in ViewBag.Cars as SelectList)
+                                    {
+                                        <option value="@car.Value" selected="@car.Selected">@car.Text</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        @if (Model.AssignedDriver != null || Model.AssignedCar != null)
+                        {
+                            <div class="alert alert-info">
+                                <h6><i class="bi bi-info-circle"></i> Поточні призначення:</h6>
+                                @if (Model.AssignedDriver != null)
+                                {
+                                    <p class="mb-1">
+                                        <strong>Водій:</strong> @Model.AssignedDriver.Name
+                                        (Рейтинг: ⭐ @Model.AssignedDriver.Rating.ToString("F1"))
+                                    </p>
+                                }
+                                @if (Model.AssignedCar != null)
+                                {
+                                    <p class="mb-0">
+                                        <strong>Автомобіль:</strong> @Model.AssignedCar.Brand @Model.AssignedCar.Model
+                                        (@Model.AssignedCar.LicensePlate)
+                                    </p>
+                                }
+                            </div>
+                        }
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save"></i> Зберегти зміни
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Назад до списку
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
